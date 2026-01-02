@@ -1,0 +1,7 @@
+spacy==3.8.7
+presidio_analyzer==2.2.360
+presidio_anonymizer==2.2.360
+regex==2025.11.3
+python-dotenv==1.2.1
+requests==2.32.5
+pytest==8.3.2
