@@ -1,0 +1,84 @@
+# Custom PII Detection Configuration
+# -------------------------------------------------------------
+# About `score`:
+#   Each pattern includes a `score` (0.0–1.0) representing its relative confidence/priority.
+#   During overlap resolution in the masking pipeline, spans with:
+#       1. An explicit score are preferred over unscored spans.
+#       2. Higher score values win when two spans overlap.
+#       3. Longer length then earlier position act as tie‑breakers.
+#   Use higher scores (>=0.9) for highly specific, low false‑positive patterns (e.g., strict IDs).
+#   Use mid scores (~0.80–0.89) for broader patterns that may appear alongside others.
+#   Lower scores (<0.75) indicate supplemental or less reliable patterns.
+#   Adjust scores to fine‑tune which custom entity survives when patterns collide.
+# -------------------------------------------------------------
+# Define custom patterns for entity detection and masking
+
+# Example 1: Subscriber ID with context (supports "subscriber_id", subscriber id, subscriber id:, etc.)
+SUBSCRIBER_ID:
+  type: context_regex
+  context: "\"?subscriber[\\s_]+id\"?\\s*[:\\-]?\\s*\"?"
+  pattern: "\\d{5,12}"
+  replacement: "__PII_SUBSCRIBER_ID__"
+  score: 0.90
+
+# Example 2: Member ID with context (supports "member_id", member id, member id:, etc.)
+MEMBER_ID:
+  type: context_regex
+  context: "\"?member[\\s_]+id\"?\\s*[:\\-]?\\s*\"?"
+  pattern: "\\d{4,12}"
+  replacement: "__PII_MEMBER_ID__"
+  score: 0.90
+
+# Example 3: Policy Number with context
+POLICY_NUMBER:
+  type: context_regex
+  context: "policy\\s+(?:number|no\\.?|#)\\s*[:\\-]?\\s*"
+  pattern: "[A-Z0-9]{6,15}"
+  replacement: "__PII_POLICY_NUMBER__"
+  score: 0.85
+
+# Example 4: Account Number (simple pattern without context)
+ACCOUNT_NUMBER:
+  type: simple_regex
+  pattern: "\\b(?:acct|account)\\s*#?\\s*[:\\-]?\\s*\\d{8,12}\\b"
+  replacement: "__PII_ACCOUNT_NUMBER__"
+  score: 0.85
+
+# Example 5: Employee ID (supports "employee_id", employee id, emp_id, etc.)
+EMPLOYEE_ID:
+  type: context_regex
+  context: "\"?(?:employee|emp|staff)[\\s_]+(?:id|number|#)\"?\\s*[:\\-]?\\s*\"?"
+  pattern: "[A-Z]{2,4}\\-?\\d{4,8}"
+  replacement: "__PII_EMPLOYEE_ID__"
+  score: 0.85
+
+# Example 6: Custom Pharmacy Rx Group (supports "rx_group", rx group, etc.)
+RX_GROUP:
+  type: context_regex
+  context: "\"?rx[\\s_]+group\"?\\s*[:\\-]?\\s*\"?"
+  pattern: "\\d{4,10}"
+  replacement: "__PII_RX_GROUP__"
+  score: 0.90
+
+# Example 7: Insurance Claim Number
+CLAIM_NUMBER:
+  type: context_regex
+  context: "claim\\s+(?:number|no\\.?|#)\\s*[:\\-]?\\s*"
+  pattern: "[A-Z0-9]{8,15}"
+  replacement: "__PII_CLAIM_NUMBER__"
+  score: 0.85
+
+# Example 8: License Plate (simple pattern - requires at least one letter at end or in middle to avoid matching SSN/numbers)
+LICENSE_PLATE:
+  type: simple_regex
+  pattern: "\\b(?:[A-Z]{2,3}[\\s\\-]\\d{3,4}[A-Z]|[A-Z]\\d{2,3}[A-Z]{2,3})\\b"
+  replacement: "__PII_LICENSE_PLATE__"
+  score: 0.75
+
+# Example 9: Custom ID with flexible format
+CUSTOM_ID:
+  type: context_regex
+  context: "(?:customer|client)\\s+(?:id|identifier)\\s*[:\\-]?\\s*"
+  pattern: "[A-Z0-9\\-]{6,20}"
+  replacement: "__PII_CUSTOM_ID__"
+  score: 0.80
